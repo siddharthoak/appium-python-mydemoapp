@@ -1,6 +1,6 @@
 from appium.webdriver.common.appiumby import AppiumBy
 
-from .base_page import BasePage
+from .base_page import APP_PACKAGE, BasePage
 
 
 class CatalogPage(BasePage):
@@ -10,11 +10,21 @@ class CatalogPage(BasePage):
         return [e.text for e in self._els("titleTV")]
 
     def select_product(self, product_name: str):
-        # productRV is a scrollable RecyclerView with no per-row resource-id
-        # unique enough to select by — a text-based UiSelector query is the
-        # standard, robust way to pick one specific item out of a list like
-        # this in Appium/UiAutomator2.
+        # Confirmed against ProductsAdapter.java's real onBindViewHolder:
+        # only productIV (the product image) has a click listener attached —
+        # titleTV and priceTV are plain, non-interactive TextViews. Tapping
+        # titleTV directly (this method's original implementation) succeeds
+        # mechanically (the element exists and is tappable) but never
+        # navigates anywhere, since nothing is listening for that tap —
+        # confirmed live: a NoSuchElementException immediately afterward on
+        # the product detail screen's cartBt, because that screen was never
+        # reached. fromParent() finds productIV among this specific row's
+        # siblings, using the title text purely as a landmark to pick the
+        # right row out of the scrollable list — same reason a bare
+        # UiSelector on productIV alone wouldn't work, since that resource-id
+        # repeats across every row.
         self.driver.find_element(
             AppiumBy.ANDROID_UIAUTOMATOR,
-            f'new UiSelector().text("{product_name}")',
+            f'new UiSelector().text("{product_name}")'
+            f'.fromParent(new UiSelector().resourceId("{APP_PACKAGE}:id/productIV"))',
         ).click()
