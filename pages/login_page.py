@@ -36,13 +36,20 @@ class LoginPage(BasePage):
 
     def navigate_via_menu(self):
         self.open_menu()
-        # menu_item.xml's itemTV resource-id repeats across every drawer row
-        # (Products, Cart, Login, About, ...), so a text-based UiSelector
-        # query is needed to pick this one specific row, same reasoning as
-        # CatalogPage.select_product.
+        # setMenu() in MainActivity.java builds an 11-item list (Products,
+        # Webview, QR, Geolocation, Drawing, About, Reset State, Fingerprint,
+        # Virtual USB, Crash app, then Login/Logout last) inside menuRV, a
+        # RecyclerView — unlike a plain ScrollView, a RecyclerView doesn't
+        # inflate rows it hasn't scrolled to at all, so a bare
+        # find_element(text="Log In") can never see it: confirmed live, a
+        # plain UiSelector text query polled its full timeout and found
+        # nothing. UiScrollable's scrollIntoView is the standard UiAutomator2
+        # answer — it scrolls the nearest scrollable container until the
+        # target text is actually present, then returns it.
         self.driver.find_element(
             AppiumBy.ANDROID_UIAUTOMATOR,
-            'new UiSelector().text("Log In")',
+            'new UiScrollable(new UiSelector().scrollable(true))'
+            '.scrollIntoView(new UiSelector().text("Log In"))',
         ).click()
 
     def enter_username(self, username: str):
