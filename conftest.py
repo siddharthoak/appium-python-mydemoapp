@@ -53,8 +53,11 @@ def _saucelabs_config() -> tuple[str, dict]:
         # and genuinely finds nothing, because the app already skipped past
         # it to the post-login screen). fullReset clears app data so every
         # session starts logged out, matching what a real fresh install
-        # would show.
+        # would show. Explicit noReset:False alongside it — confirmed live
+        # that leaving noReset unset still resolves to true server-side,
+        # which conflicts with fullReset:True ("mutually exclusive" error).
         "appium:fullReset": True,
+        "appium:noReset": False,
         "sauce:options": {
             "username": os.environ["SAUCE_USERNAME"],
             "accessKey": os.environ["SAUCE_ACCESS_KEY"],
@@ -76,8 +79,9 @@ def _browserstack_config() -> tuple[str, dict]:
         "appium:app": os.environ["BROWSERSTACK_APP_ID"],
         # See the matching comment in _saucelabs_config — same reasoning,
         # any pooled/reused cloud device needs this to guarantee a logged-out
-        # starting state.
+        # starting state, and noReset must be explicit False alongside it.
         "appium:fullReset": True,
+        "appium:noReset": False,
         "bstack:options": {
             "userName": os.environ["BROWSERSTACK_USERNAME"],
             "accessKey": os.environ["BROWSERSTACK_ACCESS_KEY"],
