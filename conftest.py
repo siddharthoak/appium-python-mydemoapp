@@ -108,7 +108,13 @@ def driver():
     options.load_capabilities(raw_caps)
 
     drv = webdriver.Remote(server_url, options=options)
-    drv.implicitly_wait(15)
+    # Raised from an earlier 15s: confirmed live against Sauce Labs that the
+    # splash-screen-to-login transition can take longer than 15s to cold-start
+    # on a freshly-provisioned real cloud device — a find_element(nameET)
+    # polled its full 15s window and genuinely found nothing yet, not a hang.
+    # A local emulator (the `local` provider) is typically faster, but there's
+    # no cost to using the same generous wait there too.
+    drv.implicitly_wait(30)
     try:
         yield drv
     finally:
