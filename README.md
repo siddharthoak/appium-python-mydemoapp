@@ -3,8 +3,16 @@
 Reference Page Object Model test suite for [Sauce Labs' "My Demo App" Android
 app](https://github.com/saucelabs/my-demo-app-android) — a real, actively-maintained
 open-source app purpose-built for Appium demos, and the mobile counterpart to the
-`saucedemo-playwright-python` web repo alongside this one: same login → catalog →
-cart → checkout shape, but native mobile locators/gestures instead of web DOM ones.
+`saucedemo-playwright-python` web repo alongside this one: same catalog → cart →
+checkout shape, but native mobile locators/gestures instead of web DOM ones.
+
+**Unlike the web repo, there's no login wall.** Confirmed against
+`MainActivity.java`'s real source: Product Catalog is unconditionally this app's
+default landing fragment regardless of login state — login is a separate, opt-in
+screen reached via the hamburger-menu drawer's "Log In" entry
+(`LoginPage.navigate_via_menu()`), not something that gates browsing, adding to
+cart, or checkout. `logged_in_driver` in `conftest.py` is just an alias for
+`driver` for readability at call sites — it doesn't actually log in.
 
 Package under test: `com.saucelabs.mydemoapp.android`. All resource-ids referenced in
 `pages/` were confirmed against the app's real layout XML source, not guessed.

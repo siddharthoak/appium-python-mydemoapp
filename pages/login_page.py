@@ -1,3 +1,5 @@
+from appium.webdriver.common.appiumby import AppiumBy
+
 from .base_page import BasePage
 
 # Real, confirmed literal values from strings.xml (bod_example_com /
@@ -17,7 +19,31 @@ STANDARD_PASSWORD = "10203040"
 
 class LoginPage(BasePage):
     """fragment_login.xml — nameET/passwordET/loginBtn are the real
-    resource-ids in saucelabs/my-demo-app-android's source."""
+    resource-ids in saucelabs/my-demo-app-android's source.
+
+    Confirmed against MainActivity.java's real onCreate/init logic: this app
+    has no login wall at all — Product Catalog is unconditionally the
+    default landing fragment (`setFragment(FRAGMENT_PRODUCT_CATAlOG, ...)`
+    whenever no explicit fragment request is passed in), regardless of
+    login state. LoginFragment is only reached deliberately, via the
+    hamburger-menu drawer's "Log In" entry (setMenu() in MainActivity.java
+    adds a menu item with that exact string, R.string.login = "Log In",
+    only when not already logged in) — never automatically on launch.
+    navigate_via_menu() below is the one genuine, correct way to reach this
+    screen; earlier assumptions in this test suite about landing here
+    automatically were wrong and have been removed.
+    """
+
+    def navigate_via_menu(self):
+        self.open_menu()
+        # menu_item.xml's itemTV resource-id repeats across every drawer row
+        # (Products, Cart, Login, About, ...), so a text-based UiSelector
+        # query is needed to pick this one specific row, same reasoning as
+        # CatalogPage.select_product.
+        self.driver.find_element(
+            AppiumBy.ANDROID_UIAUTOMATOR,
+            'new UiSelector().text("Log In")',
+        ).click()
 
     def enter_username(self, username: str):
         self._el("nameET").send_keys(username)

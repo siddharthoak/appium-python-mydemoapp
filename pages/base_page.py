@@ -21,3 +21,8 @@ class BasePage:
     def cart_badge_count(self) -> int:
         badges = self._els("cartTV")
         return int(badges[0].text) if badges else 0
+
+    def open_menu(self):
+        """menuIV — the hamburger icon in the shared header, opens the
+        navigation drawer (Login/Logout, Cart, About, etc.)."""
+        self._el("menuIV").click()

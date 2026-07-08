@@ -140,9 +140,13 @@ def driver():
 
 @pytest.fixture
 def logged_in_driver(driver):
-    """Most flows (catalog, cart, checkout) need a logged-in session first."""
-    from pages.login_page import LoginPage
-
-    login_page = LoginPage(driver)
-    login_page.login_as_standard_user()
+    """Kept as a distinct fixture name for readability at call sites (catalog/
+    cart/checkout tests read clearly as needing "a" session), but this app
+    has no login wall — confirmed against MainActivity.java's real fragment
+    logic, Product Catalog is unconditionally the default landing screen
+    regardless of login state. An earlier version of this fixture called
+    login_as_standard_user() here on the assumption launching the app landed
+    on a login screen; that assumption was wrong (see login_page.py's
+    docstring) and has been removed. Login is only reachable deliberately via
+    LoginPage.navigate_via_menu() — see test_login.py."""
     return driver
