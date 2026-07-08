@@ -92,6 +92,18 @@ def driver():
         )
 
     server_url, raw_caps = _PROVIDERS[provider]()
+    # Relying on this fixture's own `finally: drv.quit()` to end a remote
+    # session is not enough on its own — if the test process is hard-killed
+    # (e.g. a subprocess-level timeout in whatever's running pytest), that
+    # `finally` block never executes, and a remote device session can be
+    # left running indefinitely, burning paid minutes and blocking any
+    # concurrency-limited account from starting a new session at all (hit
+    # exactly this in practice). newCommandTimeout is the server-side half
+    # of that safety net: the remote session ends itself once no new
+    # command arrives within this window, regardless of what happens to the
+    # local client process. Applies uniformly to all providers since it's
+    # part of the base Appium spec, not a provider extension.
+    raw_caps.setdefault("appium:newCommandTimeout", 60)
     options = UiAutomator2Options()
     options.load_capabilities(raw_caps)
 
