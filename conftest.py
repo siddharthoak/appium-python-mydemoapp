@@ -3,6 +3,7 @@ import os
 import pytest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
+from appium.webdriver.client_config import AppiumClientConfig
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -124,7 +125,17 @@ def driver():
     options = UiAutomator2Options()
     options.load_capabilities(raw_caps)
 
-    drv = webdriver.Remote(server_url, options=options)
+    # Confirmed live against Sauce Labs: a "new session request redirect was
+    # not followed before timeout" / "too many redirects" failure, twice,
+    # with a measured ~133s gap between the session being queued and a VM
+    # actually being assigned — a real device-pool wait, not a hang. Sauce
+    # Labs' own docs say this redirect is abandoned client-side after 45s by
+    # default; Appium-Python-Client's own default communication timeout is
+    # ~120s (since v4.3.0) — both are shorter than the real wait we observed.
+    # This raises the client's patience past that, rather than accepting
+    # session creation as flaky.
+    client_config = AppiumClientConfig(remote_server_addr=server_url, timeout=180)
+    drv = webdriver.Remote(options=options, client_config=client_config)
     # Raised from an earlier 15s: confirmed live against Sauce Labs that the
     # splash-screen-to-login transition can take longer than 15s to cold-start
     # on a freshly-provisioned real cloud device — a find_element(nameET)
