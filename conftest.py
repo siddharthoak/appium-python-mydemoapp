@@ -121,5 +121,5 @@ def logged_in_driver(driver):
     from pages.login_page import LoginPage
 
     login_page = LoginPage(driver)
-    login_page.login_as_preset_user(index=1)
+    login_page.login_as_standard_user()
     return driver

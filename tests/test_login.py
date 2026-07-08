@@ -1,9 +1,9 @@
 from pages.login_page import LoginPage
 
 
-def test_login_with_preset_credentials(driver):
+def test_login_with_standard_credentials(driver):
     login_page = LoginPage(driver)
-    login_page.login_as_preset_user(index=1)
+    login_page.login_as_standard_user()
 
     # A successful login lands on the product catalog — its title bar is
     # the simplest available signal that the login actually went through.
