@@ -86,3 +86,4 @@ Cloud providers (`saucelabs`/`browserstack`) always reference the uploaded app b
 there's no `appPackage`/`appActivity` relaunch shortcut there, since a cloud device is
 ephemeral per session and doesn't already have the app installed the way a persistent
 local emulator does.
+# appium-python-mydemoapp
