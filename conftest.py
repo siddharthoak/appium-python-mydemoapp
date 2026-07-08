@@ -46,6 +46,15 @@ def _saucelabs_config() -> tuple[str, dict]:
         "appium:deviceName": os.environ.get("SAUCE_DEVICE_NAME", "Google Pixel .*"),
         "appium:platformVersion": os.environ.get("SAUCE_PLATFORM_VERSION", "13"),
         "appium:app": os.environ["SAUCE_APP_STORAGE_FILE"],
+        # Confirmed live: without this, a cloud device pooled/reused across
+        # sessions can retain a previous test's app data — including an
+        # already-logged-in session — so a fresh test never sees the login
+        # screen at all (a find_element(nameET) that polls its full timeout
+        # and genuinely finds nothing, because the app already skipped past
+        # it to the post-login screen). fullReset clears app data so every
+        # session starts logged out, matching what a real fresh install
+        # would show.
+        "appium:fullReset": True,
         "sauce:options": {
             "username": os.environ["SAUCE_USERNAME"],
             "accessKey": os.environ["SAUCE_ACCESS_KEY"],
@@ -65,6 +74,10 @@ def _browserstack_config() -> tuple[str, dict]:
         "platformName": "Android",
         "appium:automationName": "UiAutomator2",
         "appium:app": os.environ["BROWSERSTACK_APP_ID"],
+        # See the matching comment in _saucelabs_config — same reasoning,
+        # any pooled/reused cloud device needs this to guarantee a logged-out
+        # starting state.
+        "appium:fullReset": True,
         "bstack:options": {
             "userName": os.environ["BROWSERSTACK_USERNAME"],
             "accessKey": os.environ["BROWSERSTACK_ACCESS_KEY"],
